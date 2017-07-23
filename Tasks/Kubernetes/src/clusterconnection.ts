@@ -11,11 +11,13 @@ import * as os from "os";
 
 export default class ClusterConnection {
     private kubectlPath: string;
+    private helmPath: string;
     private kubeconfigFile: string;
     private userDir: string;
 
     constructor() {
         this.kubectlPath = tl.which("kubectl", false);
+        this.helmPath = tl.which("helm", false);
         this.userDir = utils.getNewUserDirPath();
     }
 
@@ -26,6 +28,14 @@ export default class ClusterConnection {
             this.kubectlPath = path.join(this.userDir, "kubectl") + this.getExecutableExtention();
             var version = await utils.getStableKubectlVersion();
             await utils.downloadKubectl(version, this.kubectlPath);
+        }
+
+        if(!this.helmPath || !fs.existsSync(this.helmPath))
+        {
+            tl.debug(tl.loc("DownloadingHelm"));
+            this.helmPath = path.join(this.userDir, "helm") + this.getExecutableExtention();
+            var version = await utils.getStableHelmVersion();
+            await utils.downloadHelm(version, this.helmPath);
         }
     }
 
